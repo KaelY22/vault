@@ -22,6 +22,7 @@ except ImportError:
 APP_NAME = "VAULT"
 VERSION = "1.0"
 IS_WIN = platform.system() == "Windows"
+NO_WINDOW = subprocess.CREATE_NO_WINDOW if IS_WIN else 0
 
 THEMES = {
     "dark": {
@@ -151,7 +152,8 @@ class ADB:
 
     def run(self, args, timeout=None):
         return subprocess.run([self.path] + args, capture_output=True, text=True,
-                              encoding="utf-8", errors="ignore", timeout=timeout)
+                              encoding="utf-8", errors="ignore", timeout=timeout,
+                              creationflags=NO_WINDOW)
 
     def shell(self, cmd, timeout=None):
         return self.run(["shell", cmd], timeout=timeout)
@@ -312,11 +314,13 @@ class ADB:
 
     def pull(self, remote, local):
         return subprocess.run([self.path, "pull", remote, ADB._win_path(local)],
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=600)
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=600,
+                              creationflags=NO_WINDOW)
 
     def push(self, local, remote):
         return subprocess.run([self.path, "push", ADB._win_path(local), remote],
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=600)
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=600,
+                              creationflags=NO_WINDOW)
 
     def screencap(self, dest):
         try:
@@ -331,7 +335,7 @@ class ADB:
 
     def exec_custom(self, cmd_text):
         return subprocess.run(cmd_text, shell=True, capture_output=True, text=True,
-                              encoding="utf-8", errors="ignore")
+                              encoding="utf-8", errors="ignore", creationflags=NO_WINDOW)
 
 
 def safe_thread(fn):
@@ -1869,7 +1873,8 @@ class VaultApp(ctk.CTk):
             self._logcat_proc = subprocess.Popen(
                 [self.adb.path, "logcat", "-v", "brief"],
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                text=True, encoding="utf-8", errors="ignore")
+                text=True, encoding="utf-8", errors="ignore",
+                creationflags=NO_WINDOW)
         except Exception as e:
             self._tlog(f"[-] No se pudo iniciar logcat: {e}")
             return
