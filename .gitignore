@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+vault_config.json
+*.log
+enviar.sh
+server.py
